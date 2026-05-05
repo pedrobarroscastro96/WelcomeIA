@@ -25,7 +25,7 @@ const HelloIA = () => {
           <div className="mt-8 flex flex-col sm:flex-row gap-6 justify-center items-center">
             <div className="w-full sm:w-1/2">
               <a 
-                href="https://www.ibm.com/think/topics/artificial-intelligence"
+                href="https://brasilescola.uol.com.br/informatica/inteligencia-artificial.htm"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg shadow-white transition-all duration-300 transform hover:scale-105 inline-block w-full"
