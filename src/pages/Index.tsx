@@ -1,17 +1,37 @@
-// Update this page (the content is just a fallback if you fail to update the page)
-
 import { MadeWithDyad } from "@/components/made-with-dyad";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">
-          Start building your amazing project here!
-        </p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-950 p-6">
+      <div className="max-w-2xl text-center space-y-8">
+        <div className="space-y-4">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Welcome to Your App
+            </span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-light leading-relaxed">
+            Start building your amazing project here!
+          </p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+          <Button 
+            size="lg" 
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            onClick={() => window.location.href = '/hello-ia'}
+          >
+            Say Hello to IA
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </div>
+        
+        <div className="pt-6">
+          <MadeWithDyad />
+        </div>
       </div>
-      <MadeWithDyad />
     </div>
   );
 };
