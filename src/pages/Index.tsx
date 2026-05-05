@@ -4,40 +4,38 @@ import { ArrowRight } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-950 p-6">
-      {/* Main content area */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 dark:from-purple-900 dark:to-pink-900 p-6">
+      {/* Conteúdo principal */}
       <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="max-w-2xl text-center space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Welcome to Your App
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-light leading-relaxed">
-              Start building your amazing project here!
-            </p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={() => window.location.href = '/hello-ia'}
-            >
-              Say Hello to IA
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-          
-          <div className="pt-6">
-            <MadeWithDyad />
+        <div className="max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl w-full mx-auto text-center">
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tight text-white drop-shadow-lg">
+            Olá IA
+          </h1>
+          <p className="text-xl md:text-2xl lg:text-3xl text-white/90 font-medium leading-relaxed mt-4">
+            Bem-vindo ao futuro da inteligência artificial! <br className="hidden md:block" />
+            Estamos felizes em ter você aqui.
+          </p>
+
+          <div className="mt-8 flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <div className="w-full sm:w-1/2">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-purple-900/30 transition-all duration-300 transform hover:scale-105"
+                onClick={() => window.location.href = '/hello-ia'}
+              >
+                Say Hello to IA
+                <ArrowRight className="ml-2 h-5 w-5 animate-pulse inline-block" />
+              </Button>
+            </div>
+            <div className="w-full sm:w-1/2">
+              <MadeWithDyad className="text-white opacity-0 hover:opacity-100 transition-opacity duration-300 hover:text-white/90" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Developer Footer */}
-      <footer className="py-4 text-center text-gray-600 dark:text-gray-400 text-sm md:text-base">
+      {/* Rodapé com nome do desenvolvedor */}
+      <footer className="py-4 text-center text-white/80 text-sm md:text-base">
         <p>Desenvolvido por Pedro de Castro</p>
       </footer>
     </div>
