@@ -24,13 +24,15 @@ const HelloIA = () => {
 
           <div className="mt-8 flex flex-col sm:flex-row gap-6 justify-center items-center">
             <div className="w-full sm:w-1/2">
-              <button 
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg shadow-white transition-all duration-300 transform hover:scale-105"
-                onClick={() => window.location.href = '/hello-ia'}
+              <a 
+                href="https://www.ibm.com/think/topics/artificial-intelligence"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg shadow-white transition-all duration-300 transform hover:scale-105 inline-block w-full"
               >
                 Explorar Mais
-                <ArrowRight className="ml-2 h-5 w-5 animate-pulse" />
-              </button>
+                <ArrowRight className="ml-2 h-5 w-5 animate-pulse inline-block" />
+              </a>
             </div>
             <div className="w-full sm:w-1/2 flex items-center justify-center">
               <MadeWithDyad className="text-white opacity-0 hover:opacity-100 transition-opacity duration-300 hover:text-white/90" />
