@@ -34,20 +34,12 @@ const Tasks = () => {
       const { data, error } = await supabase.auth.getUser();
       if (error) {
         setError("Falha ao obter usuário autenticado.");
-        setLoading(false);
-        navigate("/login");
         return;
       }
-      if (!data.user) {
-        // not logged in
-        setLoading(false);
-        navigate("/login");
-        return;
-      }
-      setUserId(data.user.id);
+      setUserId(data.user?.id ?? null);
     };
     fetchUser();
-  }, [navigate]);
+  }, []);
 
   // Load tasks for the logged‑in user
   useEffect(() => {
