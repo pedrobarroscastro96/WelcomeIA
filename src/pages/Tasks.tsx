@@ -97,8 +97,7 @@ const Tasks = () => {
         </div>
 
         <div className="flex mb-6 space-x-3">
-          <input
-            type="text"
+          <input            type="text"
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             placeholder="Adicionar nova tarefa..."
@@ -110,8 +109,7 @@ const Tasks = () => {
             onChange={(e) => setNewDate(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
           />
-          <button
-            onClick={addTask}
+          <button            onClick={addTask}
             className="px-4 py-2 bg-yellow-400 text-white font-medium rounded-r-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
           >
             Adicionar
@@ -184,8 +182,7 @@ const Tasks = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => startEdit(task)}
+                    <button                      onClick={() => startEdit(task)}
                       className="p-1 text-gray-400 hover:text-gray-600"
                     >
                       <Edit2 className="h-4 w-4" />
