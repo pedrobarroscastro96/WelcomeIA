@@ -4,9 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 export interface Task {
   id: string;
   titulo: string;
-  data_criacao: string;
   status: string;
+  data_criacao: string;
   data_conclusao?: string;
+  user_id: string;
 }
 
 export const useTasks = () => {
@@ -35,7 +36,11 @@ export const useTasks = () => {
     try {
       const { data, error } = await supabase
         .from('tarefas')
-        .insert([{ titulo, status: 'pendente' }])
+        .insert([{ 
+          titulo, 
+          status: 'pendente',
+          user_id: (await supabase.auth.getUser()).data.user?.id 
+        }])
         .select()
         .single();
       
