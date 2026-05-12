@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Task {
   id: string;
@@ -7,7 +7,7 @@ export interface Task {
   status: string;
   data_criacao: string;
   data_conclusao?: string;
-  user_id: string | null;
+  user_id: string;
 }
 
 export const useTasks = () => {
@@ -19,14 +19,14 @@ export const useTasks = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from("tarefas")
-        .select("*")
-        .order("data_criacao", { ascending: false });
-
+        .from('tarefas')
+        .select('*')
+        .order('data_criacao', { ascending: false });
+      
       if (error) throw error;
-      setTasks(data as Task[]);
+      setTasks(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao buscar tarefas");
+      setError(err instanceof Error ? err.message : 'Erro ao buscar tarefas');
     } finally {
       setLoading(false);
     }
@@ -35,23 +35,20 @@ export const useTasks = () => {
   const addTask = async (titulo: string) => {
     try {
       const { data, error } = await supabase
-        .from("tarefas")
-        .insert([
-          {
-            titulo,
-            status: "pendente",
-            // sem login, deixamos user_id nulo (coluna aceita null)
-            user_id: null,
-          },
-        ])
+        .from('tarefas')
+        .insert([{ 
+          titulo, 
+          status: 'pendente',
+          user_id: (await supabase.auth.getUser()).data.user?.id 
+        }])
         .select()
         .single();
-
+      
       if (error) throw error;
-      setTasks((prev) => [data as Task, ...prev]);
+      setTasks(prev => [data, ...prev]);
       return data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao adicionar tarefa");
+      setError(err instanceof Error ? err.message : 'Erro ao adicionar tarefa');
       throw err;
     }
   };
@@ -59,28 +56,32 @@ export const useTasks = () => {
   const updateTask = async (id: string, updates: Partial<Task>) => {
     try {
       const { data, error } = await supabase
-        .from("tarefas")
+        .from('tarefas')
         .update(updates)
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
-
+      
       if (error) throw error;
-      setTasks((prev) => prev.map((t) => (t.id === id ? (data as Task) : t)));
+      setTasks(prev => prev.map(task => task.id === id ? data : task));
       return data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao atualizar tarefa");
+      setError(err instanceof Error ? err.message : 'Erro ao atualizar tarefa');
       throw err;
     }
   };
 
   const deleteTask = async (id: string) => {
     try {
-      const { error } = await supabase.from("tarefas").delete().eq("id", id);
+      const { error } = await supabase
+        .from('tarefas')
+        .delete()
+        .eq('id', id);
+      
       if (error) throw error;
-      setTasks((prev) => prev.filter((t) => t.id !== id));
+      setTasks(prev => prev.filter(task => task.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao deletar tarefa");
+      setError(err instanceof Error ? err.message : 'Erro ao deletar tarefa');
       throw err;
     }
   };
@@ -96,6 +97,6 @@ export const useTasks = () => {
     addTask,
     updateTask,
     deleteTask,
-    fetchTasks,
+    fetchTasks
   };
 };
