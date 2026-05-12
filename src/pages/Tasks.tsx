@@ -1,74 +1,63 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Edit2, CheckCircle, Circle, Trash2 } from "lucide-react"
-import { useTasks, Task } from "@/hooks/use-tasks"
+import { useState } from "react";
+import { Edit2, CheckCircle, Circle, Trash2 } from "lucide-react";
+import { useTasks, Task } from "@/hooks/use-tasks";
 
 const Tasks = () => {
-  const { tasks, loading, error, addTask, updateTask, deleteTask } = useTasks()
-  const [newTask, setNewTask] = useState("")
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
-  const [editTitle, setEditTitle] = useState("")
-  const navigate = useNavigate()
+  const { tasks, loading, error, addTask, updateTask, deleteTask } = useTasks();
+  const [newTask, setNewTask] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
 
   const handleAddTask = async () => {
     if (newTask.trim()) {
       try {
-        await addTask(newTask.trim())
-        setNewTask("")
+        await addTask(newTask.trim());
+        setNewTask("");
       } catch (err) {
-        console.error("Erro ao adicionar tarefa:", err)
+        console.error("Erro ao adicionar tarefa:", err);
       }
     }
-  }
+  };
 
   const startEdit = (task: Task) => {
-    setEditingTaskId(task.id)
-    setEditTitle(task.titulo)
-  }
+    setEditingTaskId(task.id);
+    setEditTitle(task.titulo);
+  };
 
   const saveEdit = async () => {
     if (editTitle.trim() && editingTaskId) {
       try {
-        await updateTask(editingTaskId, { titulo: editTitle.trim() })
-        setEditingTaskId(null)
-        setEditTitle("")
+        await updateTask(editingTaskId, { titulo: editTitle.trim() });
+        setEditingTaskId(null);
+        setEditTitle("");
       } catch (err) {
-        console.error("Erro ao atualizar tarefa:", err)
+        console.error("Erro ao atualizar tarefa:", err);
       }
     }
-  }
+  };
 
   const cancelEdit = () => {
-    setEditingTaskId(null)
-    setEditTitle("")
-  }
+    setEditingTaskId(null);
+    setEditTitle("");
+  };
 
   const toggleTaskStatus = async (task: Task) => {
     try {
-      const newStatus = task.status === 'pendente' ? 'concluída' : 'pendente'
-      const data_conclusao = newStatus === 'concluída' ? new Date().toISOString() : null
-      
-      await updateTask(task.id, { 
-        status: newStatus, 
-        data_conclusao 
-      })
+      const newStatus = task.status === "pendente" ? "concluída" : "pendente";
+      const data_conclusao = newStatus === "concluída" ? new Date().toISOString() : null;
+      await updateTask(task.id, { status: newStatus, data_conclusao });
     } catch (err) {
-      console.error("Erro ao atualizar status da tarefa:", err)
+      console.error("Erro ao atualizar status da tarefa:", err);
     }
-  }
+  };
 
   const handleDeleteTask = async (id: string) => {
     try {
-      await deleteTask(id)
+      await deleteTask(id);
     } catch (err) {
-      console.error("Erro ao deletar tarefa:", err)
+      console.error("Erro ao deletar tarefa:", err);
     }
-  }
-
-  const logout = () => {
-    localStorage.removeItem("isLoggedIn")
-    navigate("/login")
-  }
+  };
 
   if (loading) {
     return (
@@ -78,7 +67,7 @@ const Tasks = () => {
           <p className="mt-4 text-gray-600">Carregando tarefas...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -86,7 +75,7 @@ const Tasks = () => {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 font-medium">Erro: {error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-500"
           >
@@ -94,21 +83,13 @@ const Tasks = () => {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-2xl mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Minhas Tarefas</h1>
-          <button
-            onClick={logout}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
-          >
-            Sair
-          </button>
-        </div>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Minhas Tarefas</h1>
 
         <div className="flex mb-6 space-x-3">
           <input
@@ -117,7 +98,7 @@ const Tasks = () => {
             onChange={(e) => setNewTask(e.target.value)}
             placeholder="Adicionar nova tarefa..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-            onKeyPress={(e) => e.key === 'Enter' && handleAddTask()}
+            onKeyPress={(e) => e.key === "Enter" && handleAddTask()}
           />
           <button
             onClick={handleAddTask}
@@ -145,7 +126,7 @@ const Tasks = () => {
                         onChange={(e) => setEditTitle(e.target.value)}
                         placeholder="Tarefa..."
                         className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-                        onKeyPress={(e) => e.key === 'Enter' && saveEdit()}
+                        onKeyPress={(e) => e.key === "Enter" && saveEdit()}
                       />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -163,21 +144,19 @@ const Tasks = () => {
                       </button>
                     </div>
                   </div>
-                )
+                );
               }
+
               return (
                 <div
                   key={task.id}
                   className={`flex items-center justify-between p-4 border border-gray-200 rounded-md ${
-                    task.status === 'concluída' ? "bg-gray-50" : ""
+                    task.status === "concluída" ? "bg-gray-50" : ""
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <button
-                      onClick={() => toggleTaskStatus(task)}
-                      className="flex-shrink-0"
-                    >
-                      {task.status === 'concluída' ? (
+                    <button onClick={() => toggleTaskStatus(task)} className="flex-shrink-0">
+                      {task.status === "concluída" ? (
                         <CheckCircle className="h-5 w-5 text-green-500" />
                       ) : (
                         <Circle className="h-5 w-5 text-gray-400" />
@@ -186,23 +165,25 @@ const Tasks = () => {
                     <div className="flex-1 min-w-0">
                       <span
                         className={`block text-gray-800 ${
-                          task.status === 'concluída' ? "line-through text-gray-500" : ""
+                          task.status === "concluída" ? "line-through text-gray-500" : ""
                         }`}
                       >
                         {task.titulo}
                       </span>
                       <div className="flex flex-col gap-1 mt-1">
                         <span className="block text-xs text-gray-500">
-                          Criada: {new Date(task.data_criacao).toLocaleDateString('pt-BR')}
+                          Criada: {new Date(task.data_criacao).toLocaleDateString("pt-BR")}
                         </span>
                         {task.data_conclusao && (
                           <span className="block text-xs text-green-600">
-                            Concluída: {new Date(task.data_conclusao).toLocaleDateString('pt-BR')}
+                            Concluída: {new Date(task.data_conclusao).toLocaleDateString("pt-BR")}
                           </span>
                         )}
-                        <span className={`block text-xs font-medium ${
-                          task.status === 'concluída' ? 'text-green-600' : 'text-yellow-600'
-                        }`}>
+                        <span
+                          className={`block text-xs font-medium ${
+                            task.status === "concluída" ? "text-green-600" : "text-yellow-600"
+                          }`}
+                        >
                           Status: {task.status}
                         </span>
                       </div>
@@ -223,13 +204,13 @@ const Tasks = () => {
                     </button>
                   </div>
                 </div>
-              )
+              );
             })
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Tasks
+export default Tasks;

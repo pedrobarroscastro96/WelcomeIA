@@ -1,30 +1,16 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Home from "./pages/Home";
 import Tasks from "./pages/Tasks";
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Mantemos um estado de carregamento apenas para garantir que o bundle inicialize
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      setLoading(false);
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setIsAuthenticated(!!session);
-      },
-    );
-
-    return () => subscription.unsubscribe();
+    // Simular um pequeno delay de inicialização (pode ser removido)
+    const timer = setTimeout(() => setLoading(false), 200);
+    return () => clearTimeout(timer);
   }, []);
 
   if (loading) {
@@ -41,15 +27,10 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/tasks"
-          element={isAuthenticated ? <Tasks /> : <Navigate to="/login" replace />}
-        />
-        {/* fallback 404 */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/tasks" element={<Tasks />} />
+        {/* fallback 404 → redireciona para a Home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
