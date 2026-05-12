@@ -1,86 +1,100 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit2 } from "lucide-react"
-
-interface Task {
-  id: string
-  title: string
-  completed: boolean
-  date: string
-}
+import { Edit2, CheckCircle, Circle, Trash2 } from "lucide-react"
+import { useTasks, Task } from "@/hooks/use-tasks"
 
 const Tasks = () => {
-  const [tasks, setTasks] = useState<Task[]>([])
+  const { tasks, loading, error, addTask, updateTask, deleteTask } = useTasks()
   const [newTask, setNewTask] = useState("")
-  const [newDate, setNewDate] = useState("")
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState("")
-  const [editDate, setEditDate] = useState("")
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn")
-    if (isLoggedIn !== "true") {
-      navigate("/login")
-    }
-  }, [navigate])
-
-  const addTask = () => {
-    if (newTask.trim() && newDate) {
-      const task: Task = {
-        id: Date.now().toString(),
-        title: newTask.trim(),
-        completed: false,
-        date: newDate,
+  const handleAddTask = async () => {
+    if (newTask.trim()) {
+      try {
+        await addTask(newTask.trim())
+        setNewTask("")
+      } catch (err) {
+        console.error("Erro ao adicionar tarefa:", err)
       }
-      setTasks([...tasks, task])
-      setNewTask("")
-      setNewDate("")
     }
   }
 
   const startEdit = (task: Task) => {
     setEditingTaskId(task.id)
-    setEditTitle(task.title)
-    setEditDate(task.date)
+    setEditTitle(task.titulo)
   }
 
-  const saveEdit = () => {
-    if (editTitle.trim() && editDate) {
-      setTasks(
-        tasks.map((task) =>
-          task.id === editingTaskId
-            ? { ...task, title: editTitle.trim(), date: editDate }
-            : task
-        )
-      )
-      setEditingTaskId(null)
-      setEditTitle("")
-      setEditDate("")
+  const saveEdit = async () => {
+    if (editTitle.trim() && editingTaskId) {
+      try {
+        await updateTask(editingTaskId, { titulo: editTitle.trim() })
+        setEditingTaskId(null)
+        setEditTitle("")
+      } catch (err) {
+        console.error("Erro ao atualizar tarefa:", err)
+      }
     }
   }
 
   const cancelEdit = () => {
     setEditingTaskId(null)
     setEditTitle("")
-    setEditDate("")
   }
 
-  const toggleTask = (id: string) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    )
+  const toggleTaskStatus = async (task: Task) => {
+    try {
+      const newStatus = task.status === 'pendente' ? 'concluída' : 'pendente'
+      const data_conclusao = newStatus === 'concluída' ? new Date().toISOString() : null
+      
+      await updateTask(task.id, { 
+        status: newStatus, 
+        data_conclusao 
+      })
+    } catch (err) {
+      console.error("Erro ao atualizar status da tarefa:", err)
+    }
   }
 
-  const deleteTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id))
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await deleteTask(id)
+    } catch (err) {
+      console.error("Erro ao deletar tarefa:", err)
+    }
   }
 
   const logout = () => {
     localStorage.removeItem("isLoggedIn")
     navigate("/login")
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Carregando tarefas...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 font-medium">Erro: {error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-500"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -103,15 +117,10 @@ const Tasks = () => {
             onChange={(e) => setNewTask(e.target.value)}
             placeholder="Adicionar nova tarefa..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-          />
-          <input
-            type="date"
-            value={newDate}
-            onChange={(e) => setNewDate(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+            onKeyPress={(e) => e.key === 'Enter' && handleAddTask()}
           />
           <button
-            onClick={addTask}
+            onClick={handleAddTask}
             className="px-4 py-2 bg-yellow-400 text-white font-medium rounded-r-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
           >
             Adicionar
@@ -136,12 +145,7 @@ const Tasks = () => {
                         onChange={(e) => setEditTitle(e.target.value)}
                         placeholder="Tarefa..."
                         className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-                      />
-                      <input
-                        type="date"
-                        value={editDate}
-                        onChange={(e) => setEditDate(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                        onKeyPress={(e) => e.key === 'Enter' && saveEdit()}
                       />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -165,27 +169,43 @@ const Tasks = () => {
                 <div
                   key={task.id}
                   className={`flex items-center justify-between p-4 border border-gray-200 rounded-md ${
-                    task.completed ? "bg-gray-50" : ""
+                    task.status === 'concluída' ? "bg-gray-50" : ""
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={task.completed}
-                      onChange={() => toggleTask(task.id)}
-                      className="h-5 w-5 text-yellow-400 rounded focus:ring-yellow-400"
-                    />
+                    <button
+                      onClick={() => toggleTaskStatus(task)}
+                      className="flex-shrink-0"
+                    >
+                      {task.status === 'concluída' ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-gray-400" />
+                      )}
+                    </button>
                     <div className="flex-1 min-w-0">
                       <span
                         className={`block text-gray-800 ${
-                          task.completed ? "line-through text-gray-500" : ""
+                          task.status === 'concluída' ? "line-through text-gray-500" : ""
                         }`}
                       >
-                        {task.title}
+                        {task.titulo}
                       </span>
-                      <span className="block text-xs text-gray-500 mt-1">
-                        {task.date}
-                      </span>
+                      <div className="flex flex-col gap-1 mt-1">
+                        <span className="block text-xs text-gray-500">
+                          Criada: {new Date(task.data_criacao).toLocaleDateString('pt-BR')}
+                        </span>
+                        {task.data_conclusao && (
+                          <span className="block text-xs text-green-600">
+                            Concluída: {new Date(task.data_conclusao).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
+                        <span className={`block text-xs font-medium ${
+                          task.status === 'concluída' ? 'text-green-600' : 'text-yellow-600'
+                        }`}>
+                          Status: {task.status}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -196,21 +216,10 @@ const Tasks = () => {
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => deleteTask(task.id)}
-                      className="text-gray-400 hover:text-red-500"
+                      onClick={() => handleDeleteTask(task.id)}
+                      className="p-1 text-gray-400 hover:text-red-500"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
