@@ -1,31 +1,30 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Tasks from "./pages/Tasks";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { supabase } from "@/integrations/supabase/client"
+import Login from "./pages/Login"
+import Tasks from "./pages/Tasks"
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Verificar se o usuário já está logado
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      setLoading(false);
-    };
+      const { data: { user } } = await supabase.auth.getUser()
+      setIsAuthenticated(!!user)
+      setLoading(false)
+    }
 
-    checkAuth();
+    checkAuth()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setIsAuthenticated(!!session);
-      },
-    );
+    // Escutar mudanças na autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session)
+    })
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => subscription.unsubscribe()
+  }, [])
 
   if (loading) {
     return (
@@ -35,7 +34,7 @@ const App = () => {
           <p className="mt-4 text-gray-600">Carregando...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -43,16 +42,13 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/tasks"
-          element={isAuthenticated ? <Tasks /> : <Navigate to="/login" replace />}
+        <Route 
+          path="/tasks" 
+          element={isAuthenticated ? <Tasks /> : <Navigate to="/login" replace />} 
         />
-        {/* fallback 404 */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
-  );
-};
+  )
+}
 
-export default App;
+export default App
