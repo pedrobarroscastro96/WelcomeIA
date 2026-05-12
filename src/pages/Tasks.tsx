@@ -1,29 +1,29 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Edit2, Save, X } from "lucide-react";
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { Edit2 } from "lucide-react"
 
 interface Task {
-  id: string;
-  title: string;
-  completed: boolean;
-  date: string; // ISO date string (YYYY-MM-DD)
+  id: string
+  title: string
+  completed: boolean
+  date: string
 }
 
 const Tasks = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTask, setNewTask] = useState("");
-  const [newDate, setNewDate] = useState("");
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDate, setEditDate] = useState("");
-  const navigate = useNavigate();
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [newTask, setNewTask] = useState("")
+  const [newDate, setNewDate] = useState("")
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState("")
+  const [editDate, setEditDate] = useState("")
+  const navigate = useNavigate()
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const isLoggedIn = localStorage.getItem("isLoggedIn")
     if (isLoggedIn !== "true") {
-      navigate("/login");
+      navigate("/login")
     }
-  }, [navigate]);
+  }, [navigate])
 
   const addTask = () => {
     if (newTask.trim() && newDate) {
@@ -32,18 +32,18 @@ const Tasks = () => {
         title: newTask.trim(),
         completed: false,
         date: newDate,
-      };
-      setTasks([...tasks, task]);
-      setNewTask("");
-      setNewDate("");
+      }
+      setTasks([...tasks, task])
+      setNewTask("")
+      setNewDate("")
     }
-  };
+  }
 
   const startEdit = (task: Task) => {
-    setEditingTaskId(task.id);
-    setEditTitle(task.title);
-    setEditDate(task.date);
-  };
+    setEditingTaskId(task.id)
+    setEditTitle(task.title)
+    setEditDate(task.date)
+  }
 
   const saveEdit = () => {
     if (editTitle.trim() && editDate) {
@@ -53,35 +53,35 @@ const Tasks = () => {
             ? { ...task, title: editTitle.trim(), date: editDate }
             : task
         )
-      );
-      setEditingTaskId(null);
-      setEditTitle("");
-      setEditDate("");
+      )
+      setEditingTaskId(null)
+      setEditTitle("")
+      setEditDate("")
     }
-  };
+  }
 
   const cancelEdit = () => {
-    setEditingTaskId(null);
-    setEditTitle("");
-    setEditDate("");
-  };
+    setEditingTaskId(null)
+    setEditTitle("")
+    setEditDate("")
+  }
 
   const toggleTask = (id: string) => {
     setTasks(
       tasks.map((task) =>
         task.id === id ? { ...task, completed: !task.completed } : task
       )
-    );
-  };
+    )
+  }
 
   const deleteTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id));
-  };
+    setTasks(tasks.filter((task) => task.id !== id))
+  }
 
   const logout = () => {
-    localStorage.removeItem("isLoggedIn");
-    navigate("/login");
-  };
+    localStorage.removeItem("isLoggedIn")
+    navigate("/login")
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -97,7 +97,8 @@ const Tasks = () => {
         </div>
 
         <div className="flex mb-6 space-x-3">
-          <input            type="text"
+          <input
+            type="text"
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             placeholder="Adicionar nova tarefa..."
@@ -109,7 +110,8 @@ const Tasks = () => {
             onChange={(e) => setNewDate(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
           />
-          <button            onClick={addTask}
+          <button
+            onClick={addTask}
             className="px-4 py-2 bg-yellow-400 text-white font-medium rounded-r-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
           >
             Adicionar
@@ -120,43 +122,46 @@ const Tasks = () => {
           {tasks.length === 0 ? (
             <p className="text-gray-500 text-center py-4">Nenhuma tarefa adicionada</p>
           ) : (
-            tasks.map((task) => (
-              editingTaskId === task.id ? (
-                <div
-                  key={task.id}
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-md"
-                >
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="text"
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      placeholder="Tarefa..."
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-                    />
-                    <input
-                      type="date"
-                      value={editDate}
-                      onChange={(e) => setEditDate(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-                    />
+            tasks.map((task) => {
+              if (editingTaskId === task.id) {
+                return (
+                  <div
+                    key={task.id}
+                    className="flex items-center justify-between p-4 border border-gray-200 rounded-md"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Tarefa..."
+                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                      />
+                      <input
+                        type="date"
+                        value={editDate}
+                        onChange={(e) => setEditDate(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={saveEdit}
+                        className="px-3 py-2 bg-yellow-400 text-white font-medium rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
+                      >
+                        Salvar
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="px-3 py-2 text-gray-500 hover:text-gray-700"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={saveEdit}
-                      className="px-3 py-2 bg-yellow-400 text-white font-medium rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
-                    >
-                      Salvar
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      className="px-3 py-2 text-gray-500 hover:text-gray-700"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              ) : (
+                )
+              }
+              return (
                 <div
                   key={task.id}
                   className={`flex items-center justify-between p-4 border border-gray-200 rounded-md ${
@@ -171,9 +176,11 @@ const Tasks = () => {
                       className="h-5 w-5 text-yellow-400 rounded focus:ring-yellow-400"
                     />
                     <div className="flex-1 min-w-0">
-                      <span className="block text-gray-800 ${
-                        task.completed ? "line-through text-gray-500" : ""
-                      }">
+                      <span
+                        className={`block text-gray-800 ${
+                          task.completed ? "line-through text-gray-500" : ""
+                        }`}
+                      >
                         {task.title}
                       </span>
                       <span className="block text-xs text-gray-500 mt-1">
@@ -182,7 +189,8 @@ const Tasks = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button                      onClick={() => startEdit(task)}
+                    <button
+                      onClick={() => startEdit(task)}
                       className="p-1 text-gray-400 hover:text-gray-600"
                     >
                       <Edit2 className="h-4 w-4" />
@@ -207,12 +215,12 @@ const Tasks = () => {
                   </div>
                 </div>
               )
-            ))
+            })
           )}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Tasks;
+export default Tasks
