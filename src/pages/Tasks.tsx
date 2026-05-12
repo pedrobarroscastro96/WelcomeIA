@@ -5,14 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface Task {
   id: string;
-  titulo: string;
-  status: "pendente" | "concluída";
-  data_criacao: string;
-  data_conclusao?: string;
-  user_id?: string;
+  title: string;
+  status: "Todo" | "In Progress" | "Done";
+  priority?: string;
+  due_date?: string;
+  category?: string;
+  created_at: string;
+  user_id: string;
 }
 
-// Simple client‑side UUID generator
+// Simple client‑side UUID generator for temporary items
 const genId = () => crypto.randomUUID();
 
 const Tasks = () => {
@@ -24,85 +26,100 @@ const Tasks = () => {
   const [editTitle, setEditTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Load tasks – fallback to local dummy data if Supabase fails
+  // Get current user id
   useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        setError("Falha ao obter usuário autenticado.");
+        return;
+      }
+      setUserId(data.user?.id ?? null);
+    };
+    fetchUser();
+  }, []);
+
+  // Load tasks for the logged‑in user
+  useEffect(() => {
+    if (!userId) return;
     const load = async () => {
       try {
         const { data, error } = await supabase
-          .from("tarefas")
+          .from("tasks")
           .select("*")
-          .order("data_criacao", { ascending: false });
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false });
 
         if (error) throw error;
         setTasks(data as Task[]);
       } catch (err) {
-        console.warn("[Tasks] Supabase load failed, using local fallback");
-        setTasks([
-          {
-            id: genId(),
-            titulo: "Tarefa de exemplo",
-            status: "pendente",
-            data_criacao: new Date().toISOString(),
-          },
-        ]);
-        setError(
-          "Não foi possível conectar ao Supabase – usando dados locais temporários.",
-        );
+        console.error("[Tasks] Supabase load error:", err);
+        setError("Erro ao carregar tarefas do Supabase.");
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, []);
+  }, [userId]);
 
-  // CRUD helpers that update local state and try Supabase (ignore errors)
+  // Add a new task
   const addTask = async (title: string) => {
+    if (!userId) return;
     const temp: Task = {
       id: genId(),
-      titulo: title,
-      status: "pendente",
-      data_criacao: new Date().toISOString(),
+      title,
+      status: "Todo",
+      created_at: new Date().toISOString(),
+      user_id: userId,
     };
     setTasks((prev) => [temp, ...prev]);
 
     try {
       const { data, error } = await supabase
-        .from("tarefas")
-        .insert([{ titulo: title, status: "pendente", user_id: null }])
+        .from("tasks")
+        .insert([{ title, status: "Todo", user_id: userId }])
         .select()
         .single();
-      if (!error && data) {
-        setTasks((prev) =>
-          prev.map((t) => (t.id === temp.id ? (data as Task) : t)),
-        );
-      }
-    } catch {
-      // ignore – local copy already added
+
+      if (error) throw error;
+      setTasks((prev) =>
+        prev.map((t) => (t.id === temp.id ? (data as Task) : t)),
+      );
+    } catch (err) {
+      console.error("[Tasks] Add error:", err);
+      setError("Falha ao criar tarefa no Supabase.");
     }
   };
 
+  // Update task (title or status)
   const updateTask = async (id: string, updates: Partial<Task>) => {
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, ...updates } : t)),
     );
     try {
-      await supabase.from("tarefas").update(updates).eq("id", id);
-    } catch {
-      // ignore
+      const { error } = await supabase.from("tasks").update(updates).eq("id", id);
+      if (error) throw error;
+    } catch (err) {
+      console.error("[Tasks] Update error:", err);
+      setError("Falha ao atualizar tarefa no Supabase.");
     }
   };
 
+  // Delete task
   const deleteTask = async (id: string) => {
     setTasks((prev) => prev.filter((t) => t.id !== id));
     try {
-      await supabase.from("tarefas").delete().eq("id", id);
-    } catch {
-      // ignore
+      const { error } = await supabase.from("tasks").delete().eq("id", id);
+      if (error) throw error;
+    } catch (err) {
+      console.error("[Tasks] Delete error:", err);
+      setError("Falha ao remover tarefa no Supabase.");
     }
   };
 
-  // UI actions
+  // UI handlers
   const handleAddTask = async () => {
     if (newTask.trim()) {
       await addTask(newTask.trim());
@@ -112,12 +129,12 @@ const Tasks = () => {
 
   const startEdit = (task: Task) => {
     setEditingTaskId(task.id);
-    setEditTitle(task.titulo);
+    setEditTitle(task.title);
   };
 
   const saveEdit = async () => {
     if (editingTaskId && editTitle.trim()) {
-      await updateTask(editingTaskId, { titulo: editTitle.trim() });
+      await updateTask(editingTaskId, { title: editTitle.trim() });
       setEditingTaskId(null);
       setEditTitle("");
     }
@@ -129,13 +146,12 @@ const Tasks = () => {
   };
 
   const toggleStatus = async (task: Task) => {
-    const newStatus = task.status === "pendente" ? "concluída" : "pendente";
-    const data_conclusao =
-      newStatus === "concluída" ? new Date().toISOString() : null;
-    await updateTask(task.id, { status: newStatus, data_conclusao });
+    const newStatus = task.status === "Todo" ? "Done" : "Todo";
+    await updateTask(task.id, { status: newStatus });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     navigate("/login");
   };
 
@@ -161,8 +177,8 @@ const Tasks = () => {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-            <p className="text-sm text-yellow-800">{error}</p>
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
+            <p className="text-sm text-red-800">{error}</p>
           </div>
         )}
 
@@ -193,7 +209,7 @@ const Tasks = () => {
               <div
                 key={task.id}
                 className={`flex items-center justify-between p-4 border border-gray-200 rounded-md ${
-                  task.status === "concluída" ? "bg-gray-50" : ""
+                  task.status === "Done" ? "bg-gray-50" : ""
                 }`}
               >
                 {editingTaskId === task.id ? (
@@ -226,7 +242,7 @@ const Tasks = () => {
                   <>
                     <div className="flex items-center space-x-3">
                       <button onClick={() => toggleStatus(task)} className="flex-shrink-0">
-                        {task.status === "concluída" ? (
+                        {task.status === "Done" ? (
                           <CheckCircle className="h-5 w-5 text-green-500" />
                         ) : (
                           <Circle className="h-5 w-5 text-gray-400" />
@@ -235,25 +251,13 @@ const Tasks = () => {
                       <div className="flex-1 min-w-0">
                         <span
                           className={`block text-gray-800 ${
-                            task.status === "concluída" ? "line-through text-gray-500" : ""
+                            task.status === "Done" ? "line-through text-gray-500" : ""
                           }`}
                         >
-                          {task.titulo}
+                          {task.title}
                         </span>
                         <div className="mt-1 text-xs text-gray-500">
-                          Criada: {new Date(task.data_criacao).toLocaleDateString("pt-BR")}
-                          {task.data_conclusao && (
-                            <span className="block text-green-600">
-                              Concluída: {new Date(task.data_conclusao).toLocaleDateString("pt-BR")}
-                            </span>
-                          )}
-                          <span
-                            className={`block font-medium ${
-                              task.status === "concluída" ? "text-green-600" : "text-yellow-600"
-                            }`}
-                          >
-                            Status: {task.status}
-                          </span>
+                          Criada: {new Date(task.created_at).toLocaleDateString("pt-BR")}
                         </div>
                       </div>
                     </div>
