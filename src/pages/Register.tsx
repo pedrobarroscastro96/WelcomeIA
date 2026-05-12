@@ -15,28 +15,19 @@ const Register = () => {
     setError(null);
 
     try {
-      // 1️⃣ Cria a conta
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          // redirecionamento opcional após confirmação de e‑mail
+          // opcional: redirecionar para a página de confirmação de e‑mail
           emailRedirectTo: window.location.origin + "/login",
         },
       });
 
-      if (signUpError) throw signUpError;
+      if (error) throw error;
 
-      // 2️⃣ Loga imediatamente (não espera confirmação de e‑mail)
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) throw signInError;
-
-      // 3️⃣ Redireciona para a página protegida
-      navigate("/tasks");
+      // Registro concluído – redireciona para login
+      navigate("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao registrar");
     } finally {
